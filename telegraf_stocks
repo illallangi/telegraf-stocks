@@ -3,6 +3,7 @@ import re
 import argparse
 import yfinance
 from json import dumps
+from telegraf_pyplug.main import print_influxdb_format
 
 # Source: https://djangosnippets.org/snippets/585/
 camelcase_to_underscore = (
@@ -12,18 +13,22 @@ camelcase_to_underscore = (
 )
 
 
-def process(ticker=None, measurement=None):
+def process(ticker=None, measurement=None, json=False):
     payload = yfinance.Ticker(ticker)
-    tags, values = convert(payload=payload.info)
-    return dump_influxdb_line(
-        tags=tags,
-        values=values,
-        measurement=measurement)
+    tags, fields = convert(payload=payload.info)
+    line = {"tags": tags, "fields": fields, "measurement": measurement}
+    if json:
+        print(dumps(line))
+    else:
+        print_influxdb_format(
+            add_timestamp=True,
+            **line
+        )
 
 
 def convert(payload=None):
     tags = {}
-    values = {}
+    fields = {}
 
     for k in payload:
         v = payload[k]
@@ -37,23 +42,8 @@ def convert(payload=None):
         except TypeError:  # All null values are ignored
             pass
         if converted_value:
-            values[converted_key] = converted_value
-    return (tags, values)
-
-
-def dump_influxdb_line(tags=None, values=None, measurement=None):
-    tags_line = ",".join(
-        "%s=%s" % (k, influxdb_escaped(tags[k])) for k in tags
-    )
-    values_line = ",".join("%s=%f" % (k, values[k]) for k in values)
-    final_line = measurement + "," + tags_line + " " + values_line
-    return final_line
-
-
-def influxdb_escaped(value):
-    return (
-        value.replace(" ", "\\ ").replace('"', '"').replace(",", "\\,").replace("=", "\\=")
-    )
+            fields[converted_key] = converted_value
+    return (tags, fields)
 
 
 if __name__ == "__main__":
@@ -66,8 +56,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--measurement", default="stocks", help="Measurement name for InfluxDB."
     )
+    parser.add_argument(
+        "--json", action="store_true", help="Output in JSON instead of InfluxDB"
+    )
     args = parser.parse_args()
     try:
-        print(process(ticker=args.ticker, measurement=args.measurement))
+        process(ticker=args.ticker, measurement=args.measurement, json=args.json)
     except Exception as e:
         print(e)
