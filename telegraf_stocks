@@ -13,17 +13,18 @@ camelcase_to_underscore = (
 )
 
 
-def process(ticker=None, measurement=None, json=False):
-    payload = yfinance.Ticker(ticker)
-    tags, fields = convert(payload=payload.info)
-    line = {"tags": tags, "fields": fields, "measurement": measurement}
-    if json:
-        print(dumps(line))
-    else:
-        print_influxdb_format(
-            add_timestamp=True,
-            **line
-        )
+def process(tickers=None, measurement=None, json=False):
+    for ticker in tickers.split(','):
+        payload = yfinance.Ticker(ticker)
+        tags, fields = convert(payload=payload.info)
+        line = {"tags": tags, "fields": fields, "measurement": measurement}
+        if json:
+            print(dumps(line))
+        else:
+            print_influxdb_format(
+                add_timestamp=True,
+                **line
+            )
 
 
 def convert(payload=None):
@@ -51,7 +52,7 @@ if __name__ == "__main__":
         description="Retrieves stock information from Yahoo Finance and formats them in InfluxDB line format."
     )
     parser.add_argument(
-        "--ticker", required=True, help="Ticker symbol to check on Yahoo Finance."
+        "--tickers", required=True, help="Comma-seperated ticker symbols to check on Yahoo Finance."
     )
     parser.add_argument(
         "--measurement", default="stocks", help="Measurement name for InfluxDB."
@@ -61,6 +62,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     try:
-        process(ticker=args.ticker, measurement=args.measurement, json=args.json)
+        process(tickers=args.tickers, measurement=args.measurement, json=args.json)
     except Exception as e:
         print(e)
