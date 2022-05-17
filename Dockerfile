@@ -1,4 +1,5 @@
 FROM docker.io/library/python:3.9.10
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONIOENCODING=UTF-8 \
