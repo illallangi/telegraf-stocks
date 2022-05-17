@@ -21,7 +21,7 @@ RUN python3 -m pip install --no-cache-dir -r /usr/src/app/requirements.txt
 COPY entrypoint.sh /entrypoint.sh
 COPY telegraf.conf /etc/telegraf/telegraf.conf
 
-COPY ./telegraf_stocks /usr/src/app/telegraf_stocks
+COPY ./telegraf_stocks.py /usr/src/app/telegraf_stocks.py
 
 ENTRYPOINT ["/entrypoint.sh"]
 RUN chmod +x /entrypoint.sh
