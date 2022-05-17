@@ -52,7 +52,7 @@ if __name__ == "__main__":
         description="Retrieves stock information from Yahoo Finance and formats them in InfluxDB line format."
     )
     parser.add_argument(
-        "--tickers", required=True, help="Comma-seperated ticker symbols to check on Yahoo Finance."
+        "--tickers", required=True, help="Comma-separated ticker symbols to check on Yahoo Finance."
     )
     parser.add_argument(
         "--measurement", default="stocks", help="Measurement name for InfluxDB."
