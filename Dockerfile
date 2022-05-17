@@ -1,4 +1,5 @@
 FROM docker.io/library/python:3.9.10
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONIOENCODING=UTF-8 \
@@ -17,8 +18,8 @@ RUN apt-get update && \
 COPY ./requirements.txt /usr/src/app/requirements.txt
 RUN python3 -m pip install --no-cache-dir -r /usr/src/app/requirements.txt
 
-ADD entrypoint.sh /entrypoint.sh
-ADD telegraf.conf /etc/telegraf/telegraf.conf
+COPY entrypoint.sh /entrypoint.sh
+COPY telegraf.conf /etc/telegraf/telegraf.conf
 
 COPY ./telegraf_stocks /usr/src/app/telegraf_stocks
 
